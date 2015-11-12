@@ -12,12 +12,12 @@ Alternative/Replacement for the Wayfinder extra.
 ## Manual Install
  - Download files and put in your MODX install
  - Create Snippets in MODX Manager, code for [Snippets](https://rtfm.modx.com/revolution/2.x/developing-in-modx/basic-development/snippets): 
- [core/components/menubuilder/elements/snippets](../blob/master/core/components/menubuilder/elements/snippets)
+ [core/components/menubuilder/elements/snippets](../master/core/components/menubuilder/elements/snippets)
     - menuBuilder
     - installMenuBuilder
  - Run the install Snippet in a Resource, this will create the database table
  - Create the [Plugin](https://rtfm.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins): 
- buildMenuSequence, see code:  [core/components/menubuilder/elements/plugins](../blob/master/core/components/menubuilder/elements/plugins) 
+ buildMenuSequence, see code:  [core/components/menubuilder/elements/plugins](../master/core/components/menubuilder/elements/plugins) 
  and attach System Events:
     - OnDocFormSave
     - OnResourceSort
