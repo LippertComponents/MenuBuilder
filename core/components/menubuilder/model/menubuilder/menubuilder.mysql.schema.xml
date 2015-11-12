@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model package="menubuilder" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" version="1.1">
+
+	<object class="MbResource" extends="modResource">
+		<composite alias="Sequence" local="id" class="MbSequence" foreign="resource_id" cardinality="one" owner="local" />
+	</object>
+
+	<object class="MbSequence" table="mb_sequence" extends="xPDOSimpleObject">
+		<field key="resource_id" dbtype="int" precision="11" phptype="integer" null="false" />
+		<field key="depth" dbtype="int" precision="3" phptype="integer" null="false" />
+		<field key="path" dbtype="varchar" precision="255" phptype="string" null="false" index="index" />
+        <field key="org_parent" dbtype="int" precision="11" phptype="integer" null="false" />
+        <field key="org_menuindex" dbtype="int" precision="11" phptype="integer" null="false" />
+
+		<index alias="Sort" name="Sort" primary="false" unique="true" type="BTREE" >
+			<column key="path" length="10" collation="A" null="false" />
+			<column key="resource_id" length="" collation="A" null="false" />
+			<column key="depth" length="" collation="A" null="false" />
+		</index>
+
+        <aggregate alias="Resource" local="resource_id" foreign="id" cardinality="one" owner="foreign" />
+
+	</object>
+</model>
