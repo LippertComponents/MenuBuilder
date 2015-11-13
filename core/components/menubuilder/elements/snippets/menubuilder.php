@@ -17,7 +17,9 @@ if ( (bool)$modx->getOption('debug', $scriptProperties, false) ) {
  * Now get user options:
  */
 $menuBuilder
+    ->setOption('startId', (int)$modx->getOption('startId', $scriptProperties, 0))
     ->setOption('displayStart', (bool)$modx->getOption('displayStart', $scriptProperties, false))
+    ->setOption('resourceColumns', $modx->getOption('', $scriptProperties, null))
     ->setOption('viewHidden', (bool)$modx->getOption('viewHidden', $scriptProperties, false))
     ->setOption('viewUnpublished', (bool)$modx->getOption('viewUnpublished', $scriptProperties, false))
     ->setOption('viewDeleted', (bool)$modx->getOption('viewDeleted', $scriptProperties, false))
@@ -26,8 +28,13 @@ $menuBuilder
     ->setOption('limit', $modx->getOption('limit', $scriptProperties, 0))
     ->setOption('offset', $modx->getOption('offset', $scriptProperties, 0))
     ->setOption('scheme', $modx->getOption('scheme', $scriptProperties, $modx->getOption('link_tag_scheme')))
-    ->setOption('where', $modx->getOption('where', $scriptProperties, null));
-    //->setOption('', $modx->getOption('', $scriptProperties, ''));
+    ->setOption('where', $modx->getOption('where', $scriptProperties, null))
+    ->setOption('debugSql', (bool)$modx->getOption('debugSql', $scriptProperties, false))
+    ->setOption('rawTvs', $modx->getOption('rawTvs', $scriptProperties, ''))
+    ->setOption('processTvs', $modx->getOption('processTvs', $scriptProperties, ''))
+    //->setOption('', $modx->getOption('', $scriptProperties, ''))
+    ->setIteratorType($modx->getOption('iterateType', $scriptProperties, 'getIterator'));
+
 /**
  * TODO
     includeDocs
@@ -47,6 +54,7 @@ foreach ( $scriptProperties as $property => $value ) {
             $menuBuilder->setChunk('chunkWrapper', $value);
             continue 2;
             break;
+        case 'chunkItem':
         case 'chunkItem':
             $menuBuilder->setChunk('chunkItem', $value);
             continue 2;
@@ -99,7 +107,7 @@ foreach ( $scriptProperties as $property => $value ) {
 }
 
 $output = $menuBuilder->buildMenu(
-    (int)$modx->getOption('start_id', $scriptProperties, 0),
+    (int)$modx->getOption('startId', $scriptProperties, 0),
     (int)$modx->getOption('level', $scriptProperties, 0)
 );
 

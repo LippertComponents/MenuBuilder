@@ -50,6 +50,14 @@ class MenuBuilder {
      * @access protected
      */
     protected $debug = false;
+    /**
+     * @var string|null
+     */
+    protected $menu_output = null;
+    /**
+     * @var array ~ array( Parent_path => string)
+     */
+    protected $menu_parts = array();
 
     /**
      * @var modX object
@@ -67,6 +75,7 @@ class MenuBuilder {
             'path_decimal_places' => 3, // int
 
             'displayStart' => false, // bool
+            'resourceColumns' => null,
             'viewHidden' => false, // bool
             'viewUnpublished' => false, // bool
             'viewDeleted' => false, // bool
@@ -77,6 +86,9 @@ class MenuBuilder {
             'scheme' => $this->modx->getOption('link_tag_scheme', null, 'abs'),
             'where' => null, // JSON ~ SQL
             'debugSql' => false,
+            'rawTvs' => null,
+            'processTvs' => null,
+            'iterateType' => 'getIterator',// query, getIterator, getCollection
 
             // TODO
             'includeDocs',
@@ -90,6 +102,8 @@ class MenuBuilder {
         $core_path = $modx->getOption('menubuilder.core_path', null, $this->modx->getOption('core_path').'components/menubuilder/');
         // add package:
         $this->modx->addPackage('menubuilder', $core_path . 'model/');
+
+        require_once  $core_path . 'model/menubuilder/MbIterator.php';
 
     }
 
@@ -106,7 +120,10 @@ class MenuBuilder {
         if ( !empty( $depth ) ) {
             $depth = (int)$depth;
         }
-        $valid_options = array();
+        $valid_options = array(
+            'chunkWrapper',
+            'chunkItem'
+        );
         if ( in_array($type, $valid_options) ) {
             $this->chunks[$type.$depth] = $name;
         } else {
@@ -151,7 +168,9 @@ class MenuBuilder {
             'separator',
             'path_decimal_places',
 
+            'startId', // int
             'displayStart', // bool
+            'resourceColumns', // string
             'viewHidden', // bool
             'viewUnpublished', // bool
             'viewDeleted', // bool
@@ -162,6 +181,9 @@ class MenuBuilder {
             'scheme',
             'where', // JSON ~ SQL
             'debugSql', // bool
+            //'iterateType',
+            'rawTvs',
+            'processTvs',
 
             // TODO
             'includeDocs',
@@ -170,6 +192,7 @@ class MenuBuilder {
             'sortBy',
             'TVs'
         );
+
         if ( in_array($option, $valid_options) ) {
             $this->config[$option] = $value;
 
@@ -179,6 +202,35 @@ class MenuBuilder {
         return $this;
     }
 
+    /**
+     * 'getCollection''getIterator', PDO
+     */
+    /**
+     * @param string $type ~ getCollection, getIterator, PDO
+     *
+     * @return $this
+     */
+    public function setIteratorType($type)
+    {
+        switch ( strtolower(trim($type)) ){
+            case 'getcollection':
+                $this->config['iterateType'] = 'getCollection';
+                break;
+
+            case 'getiterator':
+                $this->config['iterateType'] = 'getIterator';
+                break;
+
+            case 'query':
+                // no break
+            case 'pdo':
+                // no break
+            default:
+                $this->config['iterateType'] = 'query';
+                break;
+        }
+        return $this;
+    }
 
 
     /**
@@ -335,6 +387,11 @@ class MenuBuilder {
     public function getBranch($start_id, $depth=0, $forward=false, $return_type='query') {
         $start_id = (int) $start_id;
         $depth = (int) $depth;
+        if ( $this->debug ) {
+            echo '<h2>Options Set</h2><pre>';var_dump($this->config);echo '</pre>';
+            echo '<h2>Chunks Set</h2><pre>';var_dump($this->chunks);echo '</pre>';
+            //exit();
+        }
         /**
          * Get all:
         SELECT
@@ -356,7 +413,28 @@ class MenuBuilder {
          */
         $resourcesQuery = $this->modx->newQuery('MbResource');
         $resourcesQuery->leftJoin('MbSequence', 'Sequence');
-        $resourcesQuery->select($this->modx->getSelectColumns('MbResource', 'MbResource','', array('id','context_key', 'pagetitle', 'parent', 'menuindex')));
+        $resource_columns = array(
+            'id',
+            'context_key',
+            'pagetitle',
+            'longtitle',
+            'menutitle',
+            'parent',
+            'menuindex',
+            'link_attributes',
+            'template',
+        );
+        if ( !empty($this->config['resourceColumns']) ) {
+            $columns = explode(',', trim($this->config['resourceColumns']));
+            foreach ( $columns as $column ) {
+                if ( in_array(trim($column), $resource_columns) ) {
+                    continue;
+                }
+                $resource_columns[] = trim($column);
+            }
+        }
+        $resourcesQuery->select($this->modx->getSelectColumns('MbResource', 'MbResource','', $resource_columns));
+
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence', 'mb_', array('id')));
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'org_parent', 'org_menuindex')));
         // start info as column data:
@@ -376,6 +454,23 @@ class MenuBuilder {
         $depth_sql = $depthQuery->toSQL();
         $resourcesQuery->select('('.$depth_sql.') AS `st_depth` ');
 
+        // rawTvs:
+        if ( !empty(trim($this->config['rawTvs'])) ) {
+            $tvs = explode(',', trim($this->config['rawTvs']) );
+            foreach ( $tvs as $tv ) {
+                $tv = trim($tv);
+                $tvQuery = $this->modx->newQuery('modTemplateVar');
+                $tvQuery->Join('modTemplateVarResource', 'TemplateVarResources');
+                $tvQuery->select($this->modx->getSelectColumns('modTemplateVarResource', 'TemplateVarResources', '', array('value')));
+                // join: modTemplateVarResource
+                $tvQuery->where(array('name' => $tv ));
+                $tvQuery->where(array('TemplateVarResources.contentid' => 0));
+                $tvQuery->prepare();
+
+                $tv_sql = '('.str_replace('`contentid` = \'0\'', '`contentid` = `MbResource`.`id` ', $tvQuery->toSQL().') AS `tv'.ucfirst($tv).'` ' );
+                $resourcesQuery->select($tv_sql);
+            }
+        }
 
         if ( $start_id > 0 ) {
             $resourcesQuery->where(array('Sequence.path:LIKE' => '[[+path]]'));
@@ -468,22 +563,36 @@ class MenuBuilder {
         if ( $this->debug  ) {
             $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->getBranch] SQL: ' . $sql);
         }
-        if ( $this->config['debugSql']  ) {
-            echo 'Not pretty SQL: <br>'.$sql.'<hr> Prettier SQL';
+        if ( $this->config['debugSql'] ) {
+            echo '<h2>XPDO SQL raw statement: </h2>'.$sql.'<hr> <h2>Same SQL, but Prettier/Formated SQL</h2>';
             echo '<pre>'.str_replace(
                         array('`, '              , 'FROM',                 'LEFT JOIN',         'WHERE',         'ORDER BY'),
-                        array('`,'.PHP_EOL.'    ', PHP_EOL.'FROM', PHP_EOL.'LEFT JOIN', PHP_EOL.'WHERE', PHP_EOL.'ORDER BY'), $sql);
-            exit();
+                        array('`,'.PHP_EOL.'    ', PHP_EOL.'FROM', PHP_EOL.'LEFT JOIN', PHP_EOL.'WHERE', PHP_EOL.'ORDER BY'), $sql).
+                '</pre>';
         }
 
         $data = null;
-        // @TODO not sure this will work any more:
         switch ($return_type) {
             case 'getCollection':
-                $data = $this->modx->getCollection('MbResource', $resourcesQuery);
+                // @TODO Does not return object, need to pass the created SQL not the object:
+                $data = $this->modx->getCollection('MbResource', $sql);
                 break;
             case 'getIterator':
-                $data = $this->modx->getIterator('MbResource', $resourcesQuery);
+                // returns empty object? Does not accept a sql statement:
+                //$data = $this->modx->getIterator('MbResource', $sql);
+                /**
+                 * Retrieves an iterable representation of a collection of xPDOObjects.
+                 */
+                $data = new MbIterator(
+                    $this->modx,
+                    array(
+                        'class' => 'MbResource',
+                        'criteria' => null,
+                        'cacheFlag' => true)
+                    );
+                //$data->xpdo = $this->modx;
+                $data->setSqlStatement($sql);
+
                 break;
             case 'sql':
                 $sql;
@@ -511,57 +620,98 @@ class MenuBuilder {
      */
     public function buildMenu ($start_id, $depth, $limits=array() )
     {
-        $output = '';
+        $this->menu_output = '';
         /**
          * array( Parent_path => string)
          */
-        $parts = array();
+        $this->menu_parts = array();
         // this is returning the branch upside down/backwards:
-        $items = $this->getBranch($start_id, $depth);
+        $items = $this->getBranch($start_id, $depth, false, $this->config['iterateType']);
         if ( is_object($items) ) {
-            $total = count($items);
+
             $count = 0;
-            // Standard PDO fetch:
-            while ($item = $items->fetch(PDO::FETCH_ASSOC)) {
-                if ( $count == 0 ) {
-                    // last item:
-                }
-                ++$count;
-                $parent_path = substr($item['path'], 0, (strrpos($item['path'], $this->config['separator'])) );
-
-                $depth = $item['depth'] - $item['st_depth'] + 1;
-
-                // now get the item:
-                $children  = null;
-                if ( isset($parts[$item['path']]) ) {
-                    $children = $parts[$item['path']];
-                }
-                $item_string = $this->getItem($item, $depth, $children);
-
-                if ( $item['path'] == $item['st_path'] || $item['depth'] == 1 ) {
-                    // top level:
-                    if ( $item['id'] == $start_id && $this->config['displayStart'] ) {
-                        $output = '';
-                    } else {
-                        $output = $item_string . $output;
+            if ( $this->config['iterateType'] == 'getCollection' || $this->config['iterateType'] == 'getIterator' ) {
+                // print_r($items);
+                $total = 0;
+                foreach ( $items AS $item ) {
+                    if ( empty($total) ) {
+                        $total = iterator_count($items);
+                        $items->rewind();
                     }
-                } else {
-                    if (isset($parts[$parent_path])) {
-                        // append to siblings:
-                        $parts[$parent_path] = $item_string . $parts[$parent_path];
-                    } else {
-                        $parts[$parent_path] = $item_string;
+                    // https://rtfm.modx.com/xpdo/2.x/class-reference/xpdoobject/field-accessors/toarray
+                    $item_data = $item->toArray('', false, true);
+                    // processTvs:
+                    if ( !empty(trim($this->config['processTvs'])) ) {
+                        $tvs = explode(',', trim($this->config['processTvs']) );
+                        foreach ( $tvs as $tv ) {
+                            $tv = trim($tv);
+                            $item_data['tv'.ucfirst($tv)] = $item->getTVValue($tv);
+                        }
                     }
-                }
 
+                    $k = $total -(++$count);
+                    if ( $this->config['displayStart'] ) {
+                        $k++;
+                    }
+                    $this->getMenuItem($item_data, $start_id, $k);
+                }
+            } else {
+                // Standard PDO fetch:
+                $total = count($items);
+                while ($item_data = $items->fetch(PDO::FETCH_ASSOC)) {
+                    if ($count == 0) {
+                        // last item:
+                    }
+                    $k = $total - (++$count);
+                    $this->getMenuItem($item_data, $start_id, $k);
+                }
             }
 
         }
         // now wrap output:
-        $output = $this->getWrapper($item, $depth, $output);
-        echo $output;
-        exit();
-        return $output;
+        if ( $this->config['displayStart'] ) {
+            $this->menu_output = $this->getWrapper($item_data, 1, $this->menu_output);
+        }
+        return $this->menu_output;
+    }
+
+    /**
+     * @param array $item
+     * @param int $start_id
+     * @param int $count
+     */
+    protected function getMenuItem($item, $start_id=0, $count=1)
+    {
+        $parent_path = substr($item['path'], 0, (strrpos($item['path'], $this->config['separator'])));
+
+        $depth = $item['depth'] - $item['st_depth'];
+        if ( $this->config['displayStart'] ) {
+            ++$depth;
+        }
+
+        // now get the item:
+        $children = null;
+        if (isset($this->menu_parts[$item['path']])) {
+            $children = $this->menu_parts[$item['path']];
+        }
+        $item['mbCount'] = $count;
+        $item_string = $this->getItem($item, $depth, $children);
+
+        if ($item['path'] == $item['st_path'] || $item['depth'] == 1) {
+            // top level:
+            if ($item['id'] == $start_id && !$this->config['displayStart']) {
+                $this->menu_output = $this->getWrapper($item, $depth+1, $children);
+            } else {
+                $this->menu_output = $item_string . $this->menu_output;
+            }
+        } else {
+            if (isset($this->menu_parts[$parent_path])) {
+                // append to siblings:
+                $this->menu_parts[$parent_path] = $item_string . $this->menu_parts[$parent_path];
+            } else {
+                $this->menu_parts[$parent_path] = $item_string;
+            }
+        }
     }
     /**
      * @param array $item
@@ -578,7 +728,7 @@ class MenuBuilder {
         if ( isset($this->chunks['chunkWrapper'.$depth]) && !empty($this->chunks['chunkWrapper'.$depth]) ) {
             $chunk = $this->chunks['chunkWrapper'.$depth];
         } else if ( isset($this->chunks['chunkWrapper']) && !empty($this->chunks['chunkWrapper']) ) {
-            $this->chunks['chunkWrapper'];
+            $chunk = $this->chunks['chunkWrapper'];
         }
         if ( empty($chunk) ) {
             $output = '<ul class="wrapper-depth-' . $depth . '">' . PHP_EOL .
@@ -588,9 +738,11 @@ class MenuBuilder {
             $placeholders = array(
                 'mbClasses' => '',
                 'mbChildren' => $children,
+                'mbLevel' => $depth,
                 'mbDepth' => $depth
             );
             $placeholders = array_merge($placeholders, $item);
+
             $output = $this->modx->getChunk($chunk, $placeholders);
         }
         return $output;
@@ -611,20 +763,22 @@ class MenuBuilder {
         if ( isset($this->chunks['chunkItem'.$depth]) && !empty($this->chunks['chunkItem'.$depth]) ) {
             $chunk = $this->chunks['chunkItem'.$depth];
         } else if ( isset($this->chunks['chunkItem']) && !empty($this->chunks['chunkItem']) ) {
-            $this->chunks['chunkItem'];
+            $chunk = $this->chunks['chunkItem'];
         }
+        $mb_children = $this->getWrapper($item, $depth+1, $children);
         if ( empty($chunk) ) {
             $output = PHP_EOL.
-                '<li class="item-depth-'.$depth.'">'.PHP_EOL.
+                '<li class="item-depth-'.$depth.' count-'.$item['mbCount'].'">'.PHP_EOL.
                 '    <a href="'.$url.'" class="" id="">'.$item['pagetitle'].'</a>'.PHP_EOL.
                 // children
-                $this->getWrapper($item, $depth+1, $children).
+                $mb_children.
                 '</li>'.PHP_EOL;
         } else {
             $placeholders = array(
-                'mbClasses' => '',
-                'mbItemClasses' => '',
-                'mbChildren' => $children,
+                'mbClasses' => '',// @TODO
+                'mbItemClasses' => '', // @TODO
+                'mbChildren' => $mb_children,
+                'mbLevel' => $depth,
                 'mbDepth' => $depth,
                 'mbUrl' => $url,
                 // @TODO make option:
