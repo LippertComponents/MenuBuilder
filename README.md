@@ -40,8 +40,8 @@ Note (bool) stands for boolean which is true/false or 1/0.
 |--- |--- |--- |
 | chunkItem | The Chunk name that will be used to render the item/Resource/link  |  |
 | chunkWrapper | The Chunk that will wrap a level or list of items |  |
-| chunkItem#Level | Replace #Level with a number, it will override the mbItem Chunk for related level  |  |
-| chunkWrapper#Level | Replace #Level with a number, it will override the mbWrapper Chunk for related level  |  |
+| chunkItem#Level | Replace #Level with a number, it will override the chunkItem Chunk for related level  |  |
+| chunkWrapper#Level | Replace #Level with a number, it will override the chunkWrapper Chunk for related level  |  |
 
 ## General options
 
