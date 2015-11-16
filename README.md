@@ -38,10 +38,10 @@ Note (bool) stands for boolean which is true/false or 1/0.
 
 | Property | Description | Default |
 |--- |--- |--- |
-| mbItem | The Chunk name that will be used to render the item/Resource/link  |  |
-| mbWrapper | The Chunk that will wrap a level or list of items |  |
-| mbItem#Level | Replace #Level with a number, it will override the mbItem Chunk for related level  |  |
-| mbWrapper#Level | Replace #Level with a number, it will override the mbWrapper Chunk for related level  |  |
+| chunkItem | The Chunk name that will be used to render the item/Resource/link  |  |
+| chunkWrapper | The Chunk that will wrap a level or list of items |  |
+| chunkItem#Level | Replace #Level with a number, it will override the mbItem Chunk for related level  |  |
+| chunkWrapper#Level | Replace #Level with a number, it will override the mbWrapper Chunk for related level  |  |
 
 ## General options
 
@@ -63,7 +63,7 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | contexts | Comma separated list of Context_keys to use for building the menu. | |
 | scheme | format for how URLs are generated.  | [System Setting](https://rtfm.modx.com/revolution/2.x/administering-your-site/settings/system-settings/link_tag_scheme) |
 | rawTvs | Comma separated list of TVs to include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase |  |
-| processTvs | Comma separated list of TVs to process include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase |  |
+| processTvs | Comma separated list of TVs to process include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase. Note: the iterateType property must be set to getIterator |  |
 
 
 ## TODO

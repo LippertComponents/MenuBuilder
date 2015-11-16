@@ -55,7 +55,6 @@ foreach ( $scriptProperties as $property => $value ) {
             continue 2;
             break;
         case 'chunkItem':
-        case 'chunkItem':
             $menuBuilder->setChunk('chunkItem', $value);
             continue 2;
             break;
@@ -94,13 +93,13 @@ foreach ( $scriptProperties as $property => $value ) {
 
     }
     // Optional wrapper depth ones:
-    if ( strpos($property, 'chunkWrapper') ) {
+    if ( strpos($property, 'chunkWrapper') === 0 ) {
         $d = (int) substr($property, strlen('chunkWrapper'));
         $menuBuilder->setChunk('chunkWrapper', $value, $d);
     }
 
     // Optional wrapper depth ones:
-    if ( strpos($property, 'chunkItem') ) {
+    if ( strpos($property, 'chunkItem') === 0 ) {
         $d = (int) substr($property, strlen('chunkItem'));
         $menuBuilder->setChunk('chunkItem', $value, $d);
     }
