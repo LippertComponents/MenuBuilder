@@ -122,7 +122,9 @@ class MenuBuilder {
         }
         $valid_options = array(
             'chunkWrapper',
-            'chunkItem'
+            'chunkItem',
+            'chunkItemResource',
+            'chunkWrapperResource'
         );
         if ( in_array($type, $valid_options) ) {
             $this->chunks[$type.$depth] = $name;
@@ -725,7 +727,9 @@ class MenuBuilder {
             return '';
         }
         $chunk = null;
-        if ( isset($this->chunks['chunkWrapper'.$depth]) && !empty($this->chunks['chunkWrapper'.$depth]) ) {
+        if ( isset($this->chunks['chunkWrapperResource'.$item['id']]) && !empty($this->chunks['chunkWrapperResource'.$item['id']]) ) {
+            $chunk = $this->chunks['chunkWrapperResource'.$item['id']];
+        } else if ( isset($this->chunks['chunkWrapper'.$depth]) && !empty($this->chunks['chunkWrapper'.$depth]) ) {
             $chunk = $this->chunks['chunkWrapper'.$depth];
         } else if ( isset($this->chunks['chunkWrapper']) && !empty($this->chunks['chunkWrapper']) ) {
             $chunk = $this->chunks['chunkWrapper'];
@@ -760,7 +764,9 @@ class MenuBuilder {
         $url = $this->modx->makeUrl($item['id'], '', '', $this->config['scheme']);
 
         $chunk = null;
-        if ( isset($this->chunks['chunkItem'.$depth]) && !empty($this->chunks['chunkItem'.$depth]) ) {
+        if ( isset($this->chunks['chunkItemResource'.$item['id']]) && !empty($this->chunks['chunkItemResource'.$item['id']]) ) {
+            $chunk = $this->chunks['chunkItemResource'.$item['id']];
+        } else if ( isset($this->chunks['chunkItem'.$depth]) && !empty($this->chunks['chunkItem'.$depth]) ) {
             $chunk = $this->chunks['chunkItem'.$depth];
         } else if ( isset($this->chunks['chunkItem']) && !empty($this->chunks['chunkItem']) ) {
             $chunk = $this->chunks['chunkItem'];

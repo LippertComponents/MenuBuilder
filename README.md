@@ -42,6 +42,9 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | chunkWrapper | The Chunk that will wrap a level or list of items |  |
 | chunkItem#Level | Replace #Level with a number, it will override the chunkItem Chunk for related level  |  |
 | chunkWrapper#Level | Replace #Level with a number, it will override the chunkWrapper Chunk for related level  |  |
+| chunkItemResource#ID | Replace #ID with a valid Resource ID number, it will override the chunkItem and related chunkItem#Level |  |
+| chunkWrapperResource#ID | Replace #ID with a valid Resource ID number, it will override the chunkWrapper and related chunkWrapper#Level  |  |
+
 
 ## General options
 

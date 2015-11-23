@@ -92,13 +92,24 @@ foreach ( $scriptProperties as $property => $value ) {
             continue 2;
 
     }
+    // Resource specific Chunks:
+    if ( strpos($property, 'chunkWrapperResource') === 0 ) {
+        $d = (int) substr($property, strlen('chunkWrapperResource'));
+        $menuBuilder->setChunk('chunkWrapperResource', $value, $d);
+    }
+    if ( strpos($property, 'chunkItemResource') === 0 ) {
+        $d = (int) substr($property, strlen('chunkItemResource'));
+        $menuBuilder->setChunk('chunkItemResource', $value, $d);
+    }
+
+    // Level specific Chunks:
     // Optional wrapper depth ones:
     if ( strpos($property, 'chunkWrapper') === 0 ) {
         $d = (int) substr($property, strlen('chunkWrapper'));
         $menuBuilder->setChunk('chunkWrapper', $value, $d);
     }
 
-    // Optional wrapper depth ones:
+    // Optional item depth ones:
     if ( strpos($property, 'chunkItem') === 0 ) {
         $d = (int) substr($property, strlen('chunkItem'));
         $menuBuilder->setChunk('chunkItem', $value, $d);
