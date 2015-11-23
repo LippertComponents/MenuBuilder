@@ -55,7 +55,7 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | level | Depth (number of levels) to build the menu from. '0' goes through all levels. | 0 |
 | limit | The limit parameter the total number of items specified | |
 | resourceColumns | Comma separated list of [Resource columns](https://rtfm.modx.com/revolution/2.x/making-sites-with-modx/commonly-used-template-tags#CommonlyUsedTemplateTags-AllTags) to add to existing columns to be included for items | id, context_key, pagetitle, longtitle, menutitle, parent, menuindex, link_attributes, template |
-| viewHidden | (bool) Hide/Show basied on the value of "Hide From Menus" checkbox | 0 |
+| viewHidden | (bool) Hide/Show based on the value of "Hide From Menus" checkbox | 0 |
 | viewUnpublished | (bool) | 0 |
 | viewDeleted | (bool) | 0 |
 | placeholder | Name of a placeholder to send results to, instead of directly returning the output. | |
