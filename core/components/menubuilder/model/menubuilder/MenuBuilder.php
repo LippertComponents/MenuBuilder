@@ -82,6 +82,7 @@ class MenuBuilder {
             'templates' => null, // comma separated list if IDs
             'contexts' => null, // comma separated list of context keys
             'limit' => null, // int
+            'limitLevelItems' => null,// array( level# => limit, ...)
             'offset' => 0, // int
             'scheme' => $this->modx->getOption('link_tag_scheme', null, 'abs'),
             'where' => null, // JSON ~ SQL
@@ -93,9 +94,7 @@ class MenuBuilder {
             // TODO
             'includeDocs',
             'excludeDocs',
-            'limitDepthItems',
             'sortBy',
-            'TVs',
         );
         $this->config = array_merge($this->config, $config);
 
@@ -179,6 +178,7 @@ class MenuBuilder {
             'templates', // comma separated list if IDs
             'contexts', // comma separated list of context keys
             'limit', // int
+            'limitLevelItems',// array( level# => limit, ...)
             'offset', // int
             'scheme',
             'where', // JSON ~ SQL
@@ -190,9 +190,7 @@ class MenuBuilder {
             // TODO
             'includeDocs',
             'excludeDocs',
-            'limitDepthItems',
             'sortBy',
-            'TVs'
         );
 
         if ( in_array($option, $valid_options) ) {
@@ -275,6 +273,7 @@ class MenuBuilder {
         P.`id` AS `mb_id`,
         P.`depth`,
         P.`path`,
+        P.`item_count`,
         P.`org_parent`,
         P.`org_menuindex`,
         FROM modx_site_content AS C
@@ -288,7 +287,7 @@ class MenuBuilder {
         $resourcesQuery->leftJoin('MbSequence', 'Sequence');
         $resourcesQuery->select($this->modx->getSelectColumns('MbResource', 'MbResource','', array('id','context_key', 'parent', 'menuindex')));
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence', 'mb_', array('id')));
-        $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'org_parent', 'org_menuindex')));
+        $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'item_count', 'org_parent', 'org_menuindex')));
         $resourcesQuery->where(array('parent' => $parent_id));
         // $criteria?
         $resourcesQuery->sortby('parent', 'ASC');
@@ -354,6 +353,7 @@ class MenuBuilder {
 
                 $mbSequence->set('path', $current_path);
                 $mbSequence->set('depth', $current_depth);
+                $mbSequence->set('item_count', $rank);
                 $mbSequence->set('org_parent', $row['parent']);
                 $mbSequence->set('org_menuindex', $row['menuindex']);
                 $mbSequence->save();
@@ -438,7 +438,7 @@ class MenuBuilder {
         $resourcesQuery->select($this->modx->getSelectColumns('MbResource', 'MbResource','', $resource_columns));
 
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence', 'mb_', array('id')));
-        $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'org_parent', 'org_menuindex')));
+        $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'item_count', 'org_parent', 'org_menuindex')));
         // start info as column data:
         $pathQuery = $this->modx->newQuery('MbSequence');
         $pathQuery->select($this->modx->getSelectColumns('MbSequence', 'MbSequence', '', array('path')));
@@ -533,6 +533,33 @@ class MenuBuilder {
         if (!empty($this->config['limit'])) {
             $offset = !empty($this->config['offset']) ? $this->config['offset'] : 0;
             $resourcesQuery->limit($this->config['limit'], $offset);
+        }
+
+        // 'limitLevelItems' => null,// array( level# => limit, ...)
+        if ( !empty($this->config['limitLevelItems']) ) {
+            $limit_levels = $this->modx->fromJSON($this->config['limitLevelItems']);
+
+            if ( $limit_levels === false ) {
+                // @TODO log error:
+            }
+            if ( is_array($limit_levels) && count($limit_levels) ) {
+                // build a CASE:
+                $case_sql = PHP_EOL." CASE ( `Sequence`.`depth` ";
+                if ( $this->config['displayStart'] ) {
+                    $case_sql .= ' + 1 ';
+                }
+                if ( $start_id > 0 ) {
+                    $case_sql .= " - ({$depth_sql})";
+                }
+                $case_sql .= ')';
+                foreach ( $limit_levels as $tmp_level => $tmp_limit ) {
+                    $case_sql .= PHP_EOL.'    WHEN '.(int)$tmp_level.
+                        PHP_EOL.'    THEN `Sequence`.`item_count` <= '.(int)$tmp_limit;
+                }
+                $case_sql .= PHP_EOL.'    ELSE 1=1    END';
+
+                $resourcesQuery->where($case_sql);
+            }
         }
 
         if ( $forward ) {
@@ -663,6 +690,7 @@ class MenuBuilder {
                 while ($item_data = $items->fetch(PDO::FETCH_ASSOC)) {
                     if ($count == 0) {
                         // last item:
+                        $total = count($items);
                     }
                     $k = $total - (++$count);
                     $this->getMenuItem($item_data, $start_id, $k);
@@ -745,7 +773,11 @@ class MenuBuilder {
                 'mbLevel' => $depth,
                 'mbDepth' => $depth
             );
-            $placeholders = array_merge($placeholders, $item);
+            if ( is_array($item) ) {
+                $placeholders = array_merge($placeholders, $item);
+            } else{
+                // @TODO review
+            }
 
             $output = $this->modx->getChunk($chunk, $placeholders);
         }

@@ -32,6 +32,7 @@ $menuBuilder
     ->setOption('debugSql', (bool)$modx->getOption('debugSql', $scriptProperties, false))
     ->setOption('rawTvs', $modx->getOption('rawTvs', $scriptProperties, ''))
     ->setOption('processTvs', $modx->getOption('processTvs', $scriptProperties, ''))
+    ->setOption('limitLevelItems', $modx->getOption('limitLevelItems', $scriptProperties, ''))
     //->setOption('', $modx->getOption('', $scriptProperties, ''))
     ->setIteratorType($modx->getOption('iterateType', $scriptProperties, 'getIterator'));
 

@@ -9,6 +9,7 @@ $xpdo_meta_map['MbSequence']= array (
     'resource_id' => NULL,
     'depth' => NULL,
     'path' => NULL,
+    'item_count' => NULL,
     'org_parent' => NULL,
     'org_menuindex' => NULL,
   ),
@@ -35,6 +36,13 @@ $xpdo_meta_map['MbSequence']= array (
       'phptype' => 'string',
       'null' => false,
       'index' => 'index',
+    ),
+    'item_count' => 
+    array (
+      'dbtype' => 'int',
+      'precision' => '11',
+      'phptype' => 'integer',
+      'null' => false,
     ),
     'org_parent' => 
     array (

@@ -9,6 +9,7 @@
 		<field key="resource_id" dbtype="int" precision="11" phptype="integer" null="false" />
 		<field key="depth" dbtype="int" precision="3" phptype="integer" null="false" />
 		<field key="path" dbtype="varchar" precision="255" phptype="string" null="false" index="index" />
+		<field key="item_count" dbtype="int" precision="11" phptype="integer" null="false" />
         <field key="org_parent" dbtype="int" precision="11" phptype="integer" null="false" />
         <field key="org_menuindex" dbtype="int" precision="11" phptype="integer" null="false" />
 
