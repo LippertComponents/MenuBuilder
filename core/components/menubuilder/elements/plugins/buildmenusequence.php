@@ -25,11 +25,13 @@ switch($eventName) {
         $new_parent = $resource->get('parent');
         $new_menuindex = $resource->get('menuindex');
 
+        $sequence = $modx->getObject('MbSequence', array('resource_id' => $resource->get('id') ) );
+
         if ( !is_object($sequence) ) {
             //$menuBuilder->setDebug();
             $menuBuilder->buildTree();
         } else {
-            $sequence = $modx->getObject('MbSequence', array('resource_id' => $resource->get('id') ) );
+
             $org_parent = $org_menuindex = null;
             if ( is_object($sequence) ) {
                 $org_parent = $sequence->get('org_parent');
