@@ -16,6 +16,7 @@ $menuBuilder = new MenuBuilder($modx);
 // $menuBuilder->setDebug();
 
 $eventName = $modx->event->name;
+
 switch($eventName) {
     case 'OnCacheUpdate':
         // complete rebuild:

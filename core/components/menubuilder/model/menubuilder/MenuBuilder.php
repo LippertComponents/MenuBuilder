@@ -484,7 +484,7 @@ class MenuBuilder {
         }
 
         if (!empty($this->config['contexts'])) {
-            $resourcesQuery->where(array('mbResource.context_key:IN' => explode(',',$this->config['contexts'])));
+            $resourcesQuery->where(array('MbResource.context_key:IN' => explode(',',$this->config['contexts'])));
             $resourcesQuery->sortby('context_key','DESC');
         }
 
@@ -492,7 +492,7 @@ class MenuBuilder {
         if ( $this->modx->hasPermission('view_deleted') && $this->config['viewDeleted']) {
 
         } else {
-            $resourcesQuery->where(array('mbResource.deleted:=' => 0));
+            $resourcesQuery->where(array('MbResource.deleted:=' => 0));
         }
 
         // @TODO Published remove children from query as well
@@ -500,14 +500,14 @@ class MenuBuilder {
         if ( $this->modx->hasPermission('view_unpublished') && $this->config['viewUnpublished']) {
             // no query
         } else {
-            $resourcesQuery->where(array('mbResource.published:=' => 1));
+            $resourcesQuery->where(array('MbResource.published:=' => 1));
         }
 
         // @TODO Hide from menus remove children from query as well
         if ( $this->config['viewHidden'] ) {
 
         } else {
-            $resourcesQuery->where(array('mbResource.hidemenu:=' => 0));
+            $resourcesQuery->where(array('MbResource.hidemenu:=' => 0));
         }
 
         /**
@@ -523,7 +523,7 @@ class MenuBuilder {
         }
         if (!empty($this->config['templates'])) {
             $resourcesQuery->where(array(
-                'mbResources.template:IN' => explode(',',$this->config['templates']),
+                'MbResources.template:IN' => explode(',',$this->config['templates']),
             ));
         }
 
