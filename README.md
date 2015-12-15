@@ -23,6 +23,10 @@ Alternative/Replacement for the Wayfinder extra.
     - OnResourceSort
  - Save or sort a Resource in the MODX Tree and it will populate the database and will for every on change.
  - Ready to use
+ - Optional, create namespace: menubuilder and then three system settings as Yes/No. This will allow you to turn/off on when rebuilds happen:
+    - menubuilder.rebuildOnCacheUpdate
+    - menubuilder.rebuildOnDocFormSave
+    - menubuilder.rebuildOnResourceSort
     
 ## Build a navigation menu
 
