@@ -425,6 +425,7 @@ class MenuBuilder {
             'menuindex',
             'link_attributes',
             'template',
+            'class_key'
         );
         if ( !empty($this->config['resourceColumns']) ) {
             $columns = explode(',', trim($this->config['resourceColumns']));
@@ -436,7 +437,11 @@ class MenuBuilder {
             }
         }
         $resourcesQuery->select($this->modx->getSelectColumns('MbResource', 'MbResource','', $resource_columns));
-
+        // Add a case:
+        $resourcesQuery->select("CASE `MbResource`.class_key
+                WHEN 'modWebLink' THEN `MbResource`.`content`
+                ELSE ''
+                END AS `webLink` ");
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence', 'mb_', array('id')));
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'item_count', 'org_parent', 'org_menuindex')));
         // start info as column data:
@@ -517,10 +522,12 @@ class MenuBuilder {
         /* JSON where ability */
         if (!empty($this->config['where'])) {
             $where = $this->modx->fromJSON($this->config['where']);
+            //echo 'Where: ';print_r($where);
             if (!empty($where)) {
                 $resourcesQuery->where($where);
             }
         }
+        // @TODO allow TV filtering
         if (!empty($this->config['templates'])) {
             $resourcesQuery->where(array(
                 'MbResources.template:IN' => explode(',',$this->config['templates']),
@@ -793,8 +800,11 @@ class MenuBuilder {
     protected function getItem($item, $depth, $children)
     {
         // @TODO use the system settings and config override for makeUrl() scheme
-        $url = $this->modx->makeUrl($item['id'], '', '', $this->config['scheme']);
-
+        if ( isset($item['class_key']) && $item['class_key'] == 'modWebLink') {
+            $url = $item['webLink'];
+        } else {
+            $url = $this->modx->makeUrl($item['id'], '', '', $this->config['scheme']);
+        }
         $chunk = null;
         if ( isset($this->chunks['chunkItemResource'.$item['id']]) && !empty($this->chunks['chunkItemResource'.$item['id']]) ) {
             $chunk = $this->chunks['chunkItemResource'.$item['id']];
