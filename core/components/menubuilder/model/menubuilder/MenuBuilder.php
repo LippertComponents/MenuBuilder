@@ -253,25 +253,7 @@ class MenuBuilder {
         foreach ( $contexts as $context ) {
             $this->buildBranch(0, array('context_key' => $context->get('key')));
         }
-        /*
-        $contexts = array();
-        $query = $this->modx->newQuery('modContext');
-        $query->select($this->modx->escape('key'));
-        if ($query->prepare() && $query->stmt->execute()) {
-            $contexts = $query->stmt->fetchAll(PDO::FETCH_COLUMN);
-        }
-        $this->debug = true;
-        foreach ( $contexts as $c => $context ) {
-            $this->modx->log(modX::LOG_LEVEL_ERROR,'[MenuBuilder->buildTree] Context: '.$context);
-            if ( $context == 'mgr' ) {
-                continue;
-            }
-            $this->buildBranch(0, array('context_key' => $context ) );
-        }
-        */
     }
-
-
 
     /**
      * @param int $parent_id
