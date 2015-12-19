@@ -248,7 +248,27 @@ class MenuBuilder {
      */
     public function buildTree()
     {
-        $this->buildBranch(0);
+        // context_key
+        $contexts = $this->modx->getCollection('modContext');
+        foreach ( $contexts as $context ) {
+            $this->buildBranch(0, array('context_key' => $context->get('key')));
+        }
+        /*
+        $contexts = array();
+        $query = $this->modx->newQuery('modContext');
+        $query->select($this->modx->escape('key'));
+        if ($query->prepare() && $query->stmt->execute()) {
+            $contexts = $query->stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+        $this->debug = true;
+        foreach ( $contexts as $c => $context ) {
+            $this->modx->log(modX::LOG_LEVEL_ERROR,'[MenuBuilder->buildTree] Context: '.$context);
+            if ( $context == 'mgr' ) {
+                continue;
+            }
+            $this->buildBranch(0, array('context_key' => $context ) );
+        }
+        */
     }
 
 
@@ -290,6 +310,9 @@ class MenuBuilder {
         $resourcesQuery->select($this->modx->getSelectColumns('MbSequence', 'Sequence','', array('depth', 'path', 'item_count', 'org_parent', 'org_menuindex')));
         $resourcesQuery->where(array('parent' => $parent_id));
         // $criteria?
+        if ( count($criteria) ) {
+            $resourcesQuery->where($criteria);
+        }
         $resourcesQuery->sortby('parent', 'ASC');
         $resourcesQuery->sortby('menuindex', 'ASC');
         $resourcesQuery->sortby('publishedon', 'DESC');
@@ -358,7 +381,7 @@ class MenuBuilder {
                 $mbSequence->set('org_menuindex', $row['menuindex']);
                 $mbSequence->save();
 
-                $this->buildBranch($row['id'], array(), $current_depth, $current_path);
+                $this->buildBranch($row['id'], $criteria, $current_depth, $current_path);
             }
         }
 

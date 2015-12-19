@@ -24,7 +24,7 @@ $menuBuilder
     ->setOption('viewUnpublished', (bool)$modx->getOption('viewUnpublished', $scriptProperties, false))
     ->setOption('viewDeleted', (bool)$modx->getOption('viewDeleted', $scriptProperties, false))
     ->setOption('templates', $modx->getOption('templates', $scriptProperties, null))
-    ->setOption('contexts', $modx->getOption('contexts', $scriptProperties, null))
+    ->setOption('contexts', $modx->getOption('contexts', $scriptProperties, $modx->context->key))
     ->setOption('limit', $modx->getOption('limit', $scriptProperties, 0))
     ->setOption('offset', $modx->getOption('offset', $scriptProperties, 0))
     ->setOption('scheme', $modx->getOption('scheme', $scriptProperties, $modx->getOption('link_tag_scheme')))

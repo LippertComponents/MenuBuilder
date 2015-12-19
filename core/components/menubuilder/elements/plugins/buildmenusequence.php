@@ -54,7 +54,7 @@ switch($eventName) {
                     $menuBuilder->buildTree();
                 } else if ($new_menuindex != $org_menuindex) {
                     // just rebuild the branch with the change:
-                    $menuBuilder->buildBranch($new_parent);
+                    $menuBuilder->buildBranch($new_parent, array('context_key' => $sequence->get('context_key')));
                 }
             }
         }
