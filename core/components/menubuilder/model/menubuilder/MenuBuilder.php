@@ -95,6 +95,8 @@ class MenuBuilder {
             'includeDocs',
             'excludeDocs',
             'sortBy',
+            // for rebuild all children:
+            'forceRebuild' => false
         );
         $this->config = array_merge($this->config, $config);
 
@@ -191,6 +193,7 @@ class MenuBuilder {
             'includeDocs',
             'excludeDocs',
             'sortBy',
+            'forceRebuild',
         );
 
         if ( in_array($option, $valid_options) ) {
@@ -248,9 +251,16 @@ class MenuBuilder {
      */
     public function buildTree()
     {
+        if ( $this->debug ) {
+            $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildTree()] Starting');
+        }
+        $this->setOption('forceRebuild', true);
         // context_key
         $contexts = $this->modx->getCollection('modContext');
         foreach ( $contexts as $context ) {
+            if ( $this->debug ) {
+                $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildTree() buildBranch()] Parent: 0 Context: '.$context->get('key') );
+            }
             $this->buildBranch(0, array('context_key' => $context->get('key')));
         }
     }
@@ -315,10 +325,16 @@ class MenuBuilder {
 
         if ( is_object($results) ) {
             $rank = 0;
+            if ( $this->debug ) {
+                $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildBranch()] SQL Has Results, continue ');
+            }
             while ($row = $results->fetch(PDO::FETCH_ASSOC)) {
                 // set the current resource depth:
                 $current_depth = $parent_depth +1;
-
+                if ( $this->debug ) {
+                    $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildBranch()] While, ID: ' . $row['id'] .
+                        ' Current Depth: ' . $current_depth);
+                }
                 if ( !isset($this->branch_data[$row['parent']]) ) {
                     // depth of parent starts at 0
                     if ( !isset($parents[$row['parent']]) ) {
@@ -347,6 +363,14 @@ class MenuBuilder {
 
                 } elseif ( $current_depth == $row['depth'] && $current_path == $row['path'] ) {
                     // no update:
+                    if ( $this->debug ) {
+                        $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildBranch()] No Update ID: ' . $row['id'] .
+                            ' Current Path: ' . $row['path'].' Set path: '.$current_path);
+                    }
+                    // but call on children:
+                    if ( $this->config['forceRebuild'] ) {
+                        $this->buildBranch($row['id'], $criteria, $current_depth, $current_path);
+                    }
                     continue;
                 } else {
                     $mbSequence = $this->modx->getObject('MbSequence', $row['mb_id']);
@@ -361,7 +385,11 @@ class MenuBuilder {
                 $mbSequence->set('item_count', $rank);
                 $mbSequence->set('org_parent', $row['parent']);
                 $mbSequence->set('org_menuindex', $row['menuindex']);
-                $mbSequence->save();
+                if ( !$mbSequence->save() ) {
+                    $this->modx->log(modX::LOG_LEVEL_ERROR, '[MenuBuilder->buildBranch() SAVE()] Error saving line: '.__LINE__.' '.PHP_EOL.
+                        print_r($this->modx->errorInfo(), true)
+                    );
+                }
 
                 $this->buildBranch($row['id'], $criteria, $current_depth, $current_path);
             }
@@ -806,6 +834,7 @@ class MenuBuilder {
     {
         // @TODO use the system settings and config override for makeUrl() scheme
         if ( isset($item['class_key']) && $item['class_key'] == 'modWebLink') {
+            // @TODO sanity check for broken MODX tags, they kill the menu! elevate to MODX issue
             $url = $item['webLink'];
         } else {
             $url = $this->modx->makeUrl($item['id'], '', '', $this->config['scheme']);

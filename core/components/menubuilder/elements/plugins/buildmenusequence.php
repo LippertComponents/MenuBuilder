@@ -12,10 +12,12 @@ require_once $core_path.'model/menubuilder/MenuBuilder.php';
 
 $menuBuilder = new MenuBuilder($modx);
 
-// @TODO System Setting to turn on/off debug:
-// $menuBuilder->setDebug();
-
 $eventName = $modx->event->name;
+
+if ( $modx->getOption('menubuilder.logDebug', null, false) ) {
+    $menuBuilder->setDebug();
+    $modx->log(modX::LOG_LEVEL_ERROR,'[MenuBuilder::Plugin] Called on Event: '.$eventName);
+}
 
 switch($eventName) {
     case 'OnCacheUpdate':
@@ -28,6 +30,7 @@ switch($eventName) {
         // @TODO review to brake down to affected branches see: \core\model\modx\processors\resource\sort.class.php
         // menubuilder.fireOnResourceSort
         if ( $modx->getOption('menubuilder.rebuildOnResourceSort', null, true) ) {
+            // $nodesAffected ~ array of resources
             $menuBuilder->buildTree();
         }
         break;

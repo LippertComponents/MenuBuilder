@@ -27,6 +27,7 @@ Alternative/Replacement for the Wayfinder extra.
     - menubuilder.rebuildOnCacheUpdate
     - menubuilder.rebuildOnDocFormSave
     - menubuilder.rebuildOnResourceSort
+    - menubuilder.logDebug
     
 ## Build a navigation menu
 
