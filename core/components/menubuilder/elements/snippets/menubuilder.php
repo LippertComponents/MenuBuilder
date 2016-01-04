@@ -13,6 +13,10 @@ $menuBuilder = new MenuBuilder($modx);
 if ( (bool)$modx->getOption('debug', $scriptProperties, false) ) {
     $menuBuilder->setDebug();
 }
+
+$branch_parents = $modx->getParentIds($modx->resource->get('id'));
+// @TODO set via context_key:
+$site_start = (integer) $modx->getOption('site_start', null, 1);
 /**
  * Now get user options:
  */
@@ -33,8 +37,12 @@ $menuBuilder
     ->setOption('rawTvs', $modx->getOption('rawTvs', $scriptProperties, ''))
     ->setOption('processTvs', $modx->getOption('processTvs', $scriptProperties, ''))
     ->setOption('limitLevelItems', $modx->getOption('limitLevelItems', $scriptProperties, ''))
+    ->setIteratorType($modx->getOption('iterateType', $scriptProperties, 'getIterator'))
     //->setOption('', $modx->getOption('', $scriptProperties, ''))
-    ->setIteratorType($modx->getOption('iterateType', $scriptProperties, 'getIterator'));
+    // generated from MODX:
+    ->setOption('activeResource', $modx->resource->get('id'))
+    ->setOption('siteStart', $site_start)
+    ->setOption('branchParents', $branch_parents);
 
 /**
  * TODO
@@ -57,6 +65,17 @@ foreach ( $scriptProperties as $property => $value ) {
             break;
         case 'chunkItem':
             $menuBuilder->setChunk('chunkItem', $value);
+            continue 2;
+            break;
+        // Set Classes:
+        case 'activeBranchClass':
+            // no break
+        case 'hereClass':
+            $menuBuilder->setClass('activeBranchClass', $value);
+            continue 2;
+            break;
+        case 'selfClass':
+            $menuBuilder->setClass('selfClass', $value);
             continue 2;
             break;
 

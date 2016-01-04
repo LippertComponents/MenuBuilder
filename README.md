@@ -73,7 +73,8 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | scheme | format for how URLs are generated.  | [System Setting](https://rtfm.modx.com/revolution/2.x/administering-your-site/settings/system-settings/link_tag_scheme) |
 | rawTvs | Comma separated list of TVs to include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase |  |
 | processTvs | Comma separated list of TVs to process include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase. Note: the iterateType property must be set to getIterator |  |
-
+| hereClass | CSS class passed to all resource items in current/active branch, showing where you are located. | active |
+| selfClass | CSS class passed only to the current resource/item.  |  | 
 
 ## TODO
 - Resource Group/ACLs 

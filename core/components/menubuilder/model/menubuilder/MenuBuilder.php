@@ -91,6 +91,10 @@ class MenuBuilder {
             'processTvs' => null,
             'iterateType' => 'getIterator',// query, getIterator, getCollection
 
+            'activeResource' => 0, // INT
+            'siteStart' => 1, // INT
+            'branchParents' => array(),// array if IDs
+
             // TODO
             'includeDocs',
             'excludeDocs',
@@ -99,6 +103,11 @@ class MenuBuilder {
             'forceRebuild' => false
         );
         $this->config = array_merge($this->config, $config);
+
+        $this->chunks = array(
+            'hereClass' => 'active',  // class gets passed to all elements in active branch
+            'selfClass' => ''
+        );
 
         $core_path = $modx->getOption('menubuilder.core_path', null, $this->modx->getOption('core_path').'components/menubuilder/');
         // add package:
@@ -149,7 +158,10 @@ class MenuBuilder {
         if ( !empty( $depth ) ) {
             $depth = (int)$depth;
         }
-        $valid_options = array();
+        $valid_options = array(
+            'hereClass',  // class gets passed to all elements in active branch
+            'selfClass',// the currently Rendered Resource, class will only be passed to
+        );
         if ( in_array($type, $valid_options) ) {
             $this->classes[$type.$depth] = $name;
         } else {
@@ -188,6 +200,9 @@ class MenuBuilder {
             //'iterateType',
             'rawTvs',
             'processTvs',
+            'activeResource',// INT a valid resource ID
+            'siteStart', // INT
+            'branchParents',// array if IDs
 
             // TODO
             'includeDocs',
@@ -848,16 +863,24 @@ class MenuBuilder {
             $chunk = $this->chunks['chunkItem'];
         }
         $mb_children = $this->getWrapper($item, $depth+1, $children);
+        $mb_classes = '';
+        if ( isset($this->config['activeResource']) && $this->config['activeResource'] == $item['id'] ) {
+            $mb_classes = $this->chunks['hereClass'].' ';
+            $mb_classes .= $this->chunks['renderedResourceClass'].' ';
+        }
+        if ( isset($this->config['branchParents']) && array_search($item['id'], $this->config['branchParents']) !== false ) {
+            $mb_classes = $this->chunks['hereClass'].' ';
+        }
         if ( empty($chunk) ) {
             $output = PHP_EOL.
-                '<li class="item-depth-'.$depth.' count-'.$item['mbCount'].'">'.PHP_EOL.
-                '    <a href="'.$url.'" class="" id="">'.$item['pagetitle'].'</a>'.PHP_EOL.
+                '<li class="item-depth-'.$depth.' count-'.$item['mbCount'].' '.$mb_classes.'">'.PHP_EOL.
+                '    <a href="'.$url.'" class="" >'.$item['pagetitle'].'</a>'.PHP_EOL.
                 // children
                 $mb_children.
                 '</li>'.PHP_EOL;
         } else {
             $placeholders = array(
-                'mbClasses' => '',// @TODO
+                'mbClasses' => $mb_classes,// @TODO
                 'mbItemClasses' => '', // @TODO
                 'mbChildren' => $mb_children,
                 'mbLevel' => $depth,
