@@ -4,7 +4,7 @@
  */
 
 // add package
-$core_path = $modx->getOption('menubuilder.core_path', null, $this->modx->getOption('core_path').'components/menubuilder/');
+$core_path = $modx->getOption('menubuilder.core_path', null, $modx->getOption('core_path').'components/menubuilder/');
 $modx->addPackage('menubuilder', $core_path . 'model/');
 
 $m = $modx->getManager();
