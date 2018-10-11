@@ -1,4 +1,11 @@
 <?php
+
+namespace LCI\MODX\MenuBuilder;
+
+use modX;
+use PDO;
+use xPDO;
+
 /**
  *
  * Manage Materialized Paths: http://en.wikipedia.org/wiki/Materialized_path
@@ -109,11 +116,8 @@ class MenuBuilder {
             'selfClass' => ''
         );
 
-        $core_path = $modx->getOption('menubuilder.core_path', null, $this->modx->getOption('core_path').'components/menubuilder/');
         // add package:
-        $this->modx->addPackage('menubuilder', $core_path . 'model/');
-
-        require_once  $core_path . 'model/menubuilder/MbIterator.php';
+        $this->modx->addPackage('menubuilder', __DIR__ . '/model/');
 
     }
 

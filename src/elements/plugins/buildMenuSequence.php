@@ -7,8 +7,7 @@
  * @var modResource $nodesAffected
  */
 
-$core_path = $modx->getOption('menubuilder.core_path', null, $modx->getOption('core_path').'components/menubuilder/');
-require_once $core_path.'model/menubuilder/MenuBuilder.php';
+use \LCI\MODX\MenuBuilder\MenuBuilder;
 
 $menuBuilder = new MenuBuilder($modx);
 

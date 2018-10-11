@@ -1,4 +1,9 @@
 <?php
+
+namespace LCI\MODX\MenuBuilder;
+
+use PDO;
+
 /**
  * An iteratable representation of an xPDOObject result set.
  *
@@ -49,7 +54,6 @@ class MbIterator /* extends xPDOIterator*/ implements Iterator {
         } else {
             // do the standard xpdo here:
             $this->rewindOriginal();
-            //parent::rewind();
         }
     }
 

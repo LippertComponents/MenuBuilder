@@ -1,0 +1,24 @@
+{
+  "name": "lci/menubuilder",
+  "description": "Alternative/Replacement for the Wayfinder extra.",
+  "license": "MIT",
+  "keywords": [
+    "modx"
+  ],
+  "authors": [
+    {
+      "name": "Joshua Gulledge",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "LCI\\MODX\\MenuBuilder\\": "src/"
+    }
+  },
+  "require": {
+    "lci/orchestrator": "^1.0.0-beta6"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

@@ -87,4 +87,7 @@ local.properties
 # TeXlipse plugin
 .texlipse
 
-# Created by .ignore support plugin (hsz.mobi)
+# Composer template
+composer.phar
+composer.lock
+/vendor/
