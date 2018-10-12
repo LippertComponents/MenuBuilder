@@ -106,7 +106,3 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | processTvs | Comma separated list of TVs to process include you will then use like: [[+tvMainImage]], the first letter of the name will be made uppercase. Note: the iterateType property must be set to getIterator |  |
 | hereClass | CSS class passed to all resource items in current/active branch, showing where you are located. | active |
 | selfClass | CSS class passed only to the current resource/item.  |  | 
-
-## TODO
-- Resource Group/ACLs 
-- Build script to package in MODX Extras
