@@ -2,6 +2,7 @@
 
 namespace LCI\MODX\MenuBuilder;
 
+use Iterator;
 use PDO;
 
 /**

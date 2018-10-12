@@ -1,29 +1,58 @@
 # MenuBuilder
-Development Version
-
-## Description
-Alternative/Replacement for the Wayfinder extra. 
+An easy way to build HTML navigation menus. MenuBuilder is an alternative/replacement for the Wayfinder extra. 
 
 ## Features
  - Use different Chunks for every level of your menu if you choose
- - Currently loads one or all menus with a single query, should be fast
+ - Performance, loads all menu items from a single SQL query
  - Simpler design and usage, faster to get up and going and more flexible.
 
-## Manual Install
- - Download files and put in your MODX install
- - Create Snippets in MODX Manager, code for [Snippets](https://rtfm.modx.com/revolution/2.x/developing-in-modx/basic-development/snippets): 
- [core/components/menubuilder/elements/snippets](../master/core/components/menubuilder/elements/snippets)
-    - menuBuilder
-    - installMenuBuilder
- - Run the install Snippet in a Resource, this will create the database table
- - Create the [Plugin](https://rtfm.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins): 
- buildMenuSequence, see code:  [core/components/menubuilder/elements/plugins](../master/core/components/menubuilder/elements/plugins) 
- and attach System Events:
+## Install
+
+Requires an installation of MODX
+
+- Install [Orchestrator](https://github.com/LippertComponents/Orchestrator)
+- Add to the composer.json file as below
+- Add to your .env file parameters in the sample.env file and customize.
+- Run ```composer update```
+- If you did not set up Orchestrator as the LocalOrchestrator example or you want to manually call the install script.  
+Run ```$ php vendor/bin/orchestrator orchestrator:package lci/modx-menubuilder``` from where you have composer.json.
+
+
+### Composer.json
+
+Add the following to your composer.json file
+
+```json
+{
+  "require": {
+    "lci/modx-menubuilder": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/LippertComponents/MenuBuilder"
+    }
+  ],
+  "extra": {
+    "auto-install": [
+      "lci/modx-menubuilder"
+    ]
+  },
+  "minimum-stability": "dev"
+}
+```
+
+## What is installed in MODX
+ - Custom database table: modx_mb_sequence
+ - Snippets [menuBuilder](/src/elements/snippets/menuBuilder.php)
+ - A [Plugin](https://rtfm.modx.com/revolution/2.x/developing-in-modx/basic-development/plugins): 
+ [buildMenuSequence](/src/elements/plugins/buildMenuSequence.php) and attach System Events:
     - OnDocFormSave
     - OnResourceSort
+    - OnCacheUpdate
  - Save or sort a Resource in the MODX Tree and it will populate the database and will for every on change.
- - Ready to use
- - Optional, create namespace: menubuilder and then three system settings as Yes/No. This will allow you to turn/off on when rebuilds happen:
+ - MODX namespace: menubuilder 
+ - System settings will allow you to turn off when the menu sequence rebuilds happen:
     - menubuilder.rebuildOnCacheUpdate
     - menubuilder.rebuildOnDocFormSave
     - menubuilder.rebuildOnResourceSort
@@ -32,9 +61,11 @@ Alternative/Replacement for the Wayfinder extra.
 ## Build a navigation menu
 
 Place a Snippet call into your appropriate Template/Chunk/Resource. Like:
+```html
 [[menuBuilder?
     &startId=`1`
 ]]
+```
 
 ## Chunks used
 By default will generate an unordered list. 

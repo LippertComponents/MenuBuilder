@@ -25,6 +25,7 @@ class InstallMenuBuilder extends Migrations
      */
     public function up()
     {
+        // This will do a modx->addPackage for the menu builder custom xpdo model
         $menuBuilder = new MenuBuilder($this->modx);
 
         $m = $this->modx->getManager();
@@ -34,9 +35,10 @@ class InstallMenuBuilder extends Migrations
 
         $snippet = $this->blender->getBlendableLoader()->getBlendableSnippet('menuBuilder');
 
-        $snippet->setFieldDescription('Build out menu, flush DB at first')
+        $snippet
             ->setSeedsDir($this->getSeedsDir())
-            ->setAsStatic('lci/menubuilder/src/elements/snippets/menuBuilder.php', 'orchestrator')
+            ->setFieldDescription('Build out menu, flush DB at first')
+            ->setAsStatic('lci/modx-menubuilder/src/elements/snippets/menuBuilder.php', 'orchestrator')
             ->setProperties([
                 "startId" => "The starting point (Resource ID) for the menu to list documents from. Specify 0 to start from the site root.",
                 "displayStart" => "Show the document as referenced by &startId in the menu.",
@@ -69,9 +71,10 @@ class InstallMenuBuilder extends Migrations
 
         $plugin = $this->blender->getBlendableLoader()->getBlendablePlugin('buildMenuSequence');
 
-        $plugin->setFieldDescription('MenuBuilder Plugin that saves the sequence of the resources')
+        $plugin
             ->setSeedsDir($this->getSeedsDir())
-            ->setAsStatic('lci/menubuilder/src/elements/plugins/buildMenuSequence.php', 'orchestrator')
+            ->setFieldDescription('MenuBuilder Plugin that saves the sequence of the resources')
+            ->setAsStatic('lci/modx-menubuilder/src/elements/plugins/buildMenuSequence.php', 'orchestrator')
             ->attachOnEvent('OnCacheUpdate')
             ->attachOnEvent('OnResourceSort')
             ->attachOnEvent('OnDocFormSave')
@@ -101,8 +104,10 @@ class InstallMenuBuilder extends Migrations
 
         foreach ($this->systemSettings as $systemSetting => $value) {
             $blendableSetting = $this->blender->getBlendableLoader()->getBlendableSystemSetting($systemSetting);
-            $blendableSetting->setSeedsDir($this->getSeedsDir())
+            $blendableSetting
+                ->setSeedsDir($this->getSeedsDir())
                 ->setFieldNamespace('MenuBuilder')
+                ->setFieldArea('MenuBuilder')
                 ->setFieldXType('combo-boolean')
                 ->setFieldValue($value);
 
