@@ -17,8 +17,7 @@
     }
   },
   "require": {
-    "lci/orchestrator": "^1.0.0-beta6"
+    "lci/orchestrator": "^1.0.0"
   },
-  "minimum-stability": "dev",
   "prefer-stable": true
 }
