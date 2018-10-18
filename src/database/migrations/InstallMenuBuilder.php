@@ -66,12 +66,13 @@ class InstallMenuBuilder extends Migrations
                 (new ElementProperty("limit"))
                     ->setArea('Query')
                     ->setDescription("The limit parameter the total number of items specified")
-                    ->setValue('numberfield')
+                    ->setValue('')
             )
             ->setElementProperty(
                 (new ElementProperty("limitLevelItems"))
                     ->setArea('Query')
                     ->setDescription("JSON style ex: &limitLevelItems=`{\"1\":\"5\",\"2\":\"4\"}` The name/left is the level and the right is the limit.")
+                    ->setValue('')
             )
             ->setElementProperty(
                 (new ElementProperty("resourceColumns"))
