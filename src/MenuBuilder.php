@@ -875,10 +875,14 @@ class MenuBuilder {
         if ( isset($this->config['branchParents']) && array_search($item['id'], $this->config['branchParents']) !== false ) {
             $mb_classes = $this->chunks['hereClass'].' ';
         }
+        $title = $item['menutitle'];
+        if (empty($title)) {
+            $title = $item['pagetitle'];
+        }
         if ( empty($chunk) ) {
             $output = PHP_EOL.
                 '<li class="item-depth-'.$depth.' count-'.$item['mbCount'].' '.$mb_classes.'">'.PHP_EOL.
-                '    <a href="'.$url.'" class="" >'.$item['pagetitle'].'</a>'.PHP_EOL.
+                '    <a href="'.$url.'" class="" >'.$title.'</a>'.PHP_EOL.
                 // children
                 $mb_children.
                 '</li>'.PHP_EOL;
@@ -890,8 +894,7 @@ class MenuBuilder {
                 'mbLevel' => $depth,
                 'mbDepth' => $depth,
                 'mbUrl' => $url,
-                // @TODO make option:
-                'mbTitle' => $item['pagetitle']
+                'mbTitle' => $title
             );
             $placeholders = array_merge($placeholders, $item);
             $output = $this->modx->getChunk($chunk, $placeholders);
