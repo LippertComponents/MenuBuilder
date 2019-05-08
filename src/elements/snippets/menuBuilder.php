@@ -24,6 +24,7 @@ $menuBuilder
     ->setOption('displayStart', (bool)$modx->getOption('displayStart', $scriptProperties, false))
     ->setOption('resourceColumns', $modx->getOption('', $scriptProperties, null))
     ->setOption('viewHidden', (bool)$modx->getOption('viewHidden', $scriptProperties, false))
+    ->setOption('viewHiddenFromTree', (bool)$modx->getOption('viewHiddenFromTree', $scriptProperties, false))
     ->setOption('viewUnpublished', (bool)$modx->getOption('viewUnpublished', $scriptProperties, false))
     ->setOption('viewDeleted', (bool)$modx->getOption('viewDeleted', $scriptProperties, false))
     ->setOption('templates', $modx->getOption('templates', $scriptProperties, null))

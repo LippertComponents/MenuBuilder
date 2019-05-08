@@ -93,6 +93,7 @@ Note (bool) stands for boolean which is true/false or 1/0.
 | limitLevelItems | [JSON style](https://rtfm.modx.com/xpdo/2.x/class-reference/xpdo/xpdo.fromjson) ex: ```  &limitLevelItems=`{"1":"5","2":"4"}` ``` The name/left is the level and the right is the limit. | |
 | resourceColumns | Comma separated list of [Resource columns](https://rtfm.modx.com/revolution/2.x/making-sites-with-modx/commonly-used-template-tags#CommonlyUsedTemplateTags-AllTags) to add to existing columns to be included for items | id, context_key, pagetitle, longtitle, menutitle, parent, menuindex, link_attributes, template |
 | viewHidden | (bool) Hide/Show based on the value of "Hide From Menus" checkbox | 0 |
+| viewHiddenFromTree | (bool) Hide/Show based on the value of the column show_in_tree, 1 will show all, 0 will filter where show_in_tree=1 | 0 |
 | viewUnpublished | (bool) | 0 |
 | viewDeleted | (bool) | 0 |
 | placeholder | Name of a placeholder to send results to, instead of directly returning the output. | |

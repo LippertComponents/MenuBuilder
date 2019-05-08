@@ -84,6 +84,7 @@ class MenuBuilder {
             'displayStart' => false, // bool
             'resourceColumns' => null,
             'viewHidden' => false, // bool
+            'viewHiddenFromTree' => false,
             'viewUnpublished' => false, // bool
             'viewDeleted' => false, // bool
             'templates' => null, // comma separated list if IDs
@@ -565,6 +566,12 @@ class MenuBuilder {
 
         } else {
             $resourcesQuery->where(array('MbResource.hidemenu:=' => 0));
+        }
+
+        if ( $this->config['viewHiddenFromTree'] ) {
+
+        } else {
+            $resourcesQuery->where(array('MbResource.show_in_tree:=' => 1));
         }
 
         /**
