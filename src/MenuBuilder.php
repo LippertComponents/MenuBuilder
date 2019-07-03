@@ -2,6 +2,7 @@
 
 namespace LCI\MODX\MenuBuilder;
 
+use LCI\MODX\MenuBuilder\Helpers\Nesting;
 use modX;
 use PDO;
 use xPDO;
@@ -20,6 +21,7 @@ use xPDO;
  *
  */
 class MenuBuilder {
+    use Nesting;
 
     /**
      * the form data config
@@ -706,6 +708,7 @@ class MenuBuilder {
         }
         return $data;
     }
+
     /**
      * @param int $start_id
      * @param int $depth
@@ -769,6 +772,95 @@ class MenuBuilder {
             $this->menu_output = $this->getWrapper($item_data, 1, $this->menu_output);
         }
         return $this->menu_output;
+    }
+
+    /**
+     * @param int $start_id
+     * @param int $depth
+     *
+     * @return array
+     */
+    public function getMenuAsNestedArray($start_id, $depth)
+    {
+        $menuResources = $this->getBranch($start_id, $depth, true);
+
+        static::$callable_format_item = function (&$item) {
+            $item = $this->formatItem($item);
+            return $item;
+        };
+
+        return $this->nest($menuResources->fetchAll(PDO::FETCH_ASSOC), $start_id);
+    }
+
+    /**
+     * @param int $start_id
+     * @param int $depth
+     * @return false|string
+     */
+    public function getMenuAsJSON($start_id, $depth)
+    {
+        return json_encode($this->getMenuAsNestedArray($start_id, $depth));
+    }
+
+    /**
+     * @param $item
+     * @return mixed
+     */
+    protected function formatItem($item)
+    {
+        $item = $this->getItemUrls($item);
+        $item['title'] = $this->getItemTitle($item);
+
+        return $item;
+    }
+
+    /**
+     * @param $item
+     * @return mixed
+     */
+    protected function getItemUrls($item)
+    {
+        if ( isset($item['class_key']) && $item['class_key'] == 'modWebLink') {
+            $item['localUrl'] = $item['fullUrl'] =  $this->processModWebLink($item['webLink']);
+        } else {
+            $item['localUrl'] = $this->modx->makeUrl($item['id'], '', '', 'abs');
+            $item['fullUrl'] = $this->modx->makeUrl($item['id'], '', '', 'full');
+        }
+
+        return $item;
+    }
+
+    /**
+     * @param $item
+     * @return mixed
+     */
+    protected function getItemTitle($item)
+    {
+        $title = $item['menutitle'];
+        if (empty($title)) {
+            $title = $item['pagetitle'];
+        }
+
+        return $title;
+    }
+
+    /**
+     * Based on MODX -> core/model/modx/modweblink.class.php->process
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function processModWebLink($string)
+    {
+        if (!is_numeric($string)) {
+            $this->modx->getParser();
+            $maxIterations= isset ($this->modx->config['parser_max_iterations']) ? intval($this->modx->config['parser_max_iterations']) : 10;
+            $this->modx->parser->processElementTags($tag='', $string, true, true, '[[', ']]', array(), $maxIterations);
+        }
+        if (is_numeric($string)) {
+            return $this->modx->makeUrl(intval($string), '', '', 'full');
+        }
+        return $string;
     }
 
     /**
@@ -858,13 +950,8 @@ class MenuBuilder {
      */
     protected function getItem($item, $depth, $children)
     {
-        // @TODO use the system settings and config override for makeUrl() scheme
-        if ( isset($item['class_key']) && $item['class_key'] == 'modWebLink') {
-            // @TODO sanity check for broken MODX tags, they kill the menu! elevate to MODX issue
-            $url = $item['webLink'];
-        } else {
-            $url = $this->modx->makeUrl($item['id'], '', '', $this->config['scheme']);
-        }
+        $url = $this->getItemUrls($item)['fullUrl'];
+
         $chunk = null;
         if ( isset($this->chunks['chunkItemResource'.$item['id']]) && !empty($this->chunks['chunkItemResource'.$item['id']]) ) {
             $chunk = $this->chunks['chunkItemResource'.$item['id']];
@@ -882,10 +969,8 @@ class MenuBuilder {
         if ( isset($this->config['branchParents']) && array_search($item['id'], $this->config['branchParents']) !== false ) {
             $mb_classes = $this->chunks['hereClass'].' ';
         }
-        $title = $item['menutitle'];
-        if (empty($title)) {
-            $title = $item['pagetitle'];
-        }
+        $title = $this->getItemTitle($item);
+
         if ( empty($chunk) ) {
             $output = PHP_EOL.
                 '<li class="item-depth-'.$depth.' count-'.$item['mbCount'].' '.$mb_classes.'">'.PHP_EOL.

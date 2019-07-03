@@ -17,7 +17,9 @@
     }
   },
   "require": {
-    "lci/orchestrator": "^1.0.0"
+    "lci/orchestrator": "^1.0.0",
+    "ext-pdo": "*",
+    "ext-json": "*"
   },
   "prefer-stable": true
 }
