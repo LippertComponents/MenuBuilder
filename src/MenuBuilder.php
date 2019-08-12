@@ -852,11 +852,17 @@ class MenuBuilder {
      */
     protected function processModWebLink($string)
     {
+        $link_tag_scheme = $this->modx->getOption('link_tag_scheme');
+        $this->modx->setOption('link_tag_scheme', 'full');
+
         if (!is_numeric($string)) {
             $this->modx->getParser();
             $maxIterations= isset ($this->modx->config['parser_max_iterations']) ? intval($this->modx->config['parser_max_iterations']) : 10;
             $this->modx->parser->processElementTags($tag='', $string, true, true, '[[', ']]', array(), $maxIterations);
         }
+
+        $this->modx->setOption('link_tag_scheme', $link_tag_scheme);
+
         if (is_numeric($string)) {
             return $this->modx->makeUrl(intval($string), '', '', 'full');
         }
