@@ -777,10 +777,10 @@ class MenuBuilder {
     /**
      * @param int $start_id
      * @param int $depth
-     *
+     * @param bool $set_index ~ if true will set the indexes from the path
      * @return array
      */
-    public function getMenuAsNestedArray($start_id, $depth)
+    public function getMenuAsNestedArray($start_id, $depth, $set_index=true)
     {
         $menuResources = $this->getBranch($start_id, $depth, true);
 
@@ -789,7 +789,7 @@ class MenuBuilder {
             return $item;
         };
 
-        return $this->nest($menuResources->fetchAll(PDO::FETCH_ASSOC), $start_id);
+        return $this->nest($menuResources->fetchAll(PDO::FETCH_ASSOC), $start_id, $set_index);
     }
 
     /**

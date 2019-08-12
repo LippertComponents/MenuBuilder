@@ -53,9 +53,10 @@ trait Nesting
      *
      * @param array  $items - array of records to apply the nesting
      * @param string $parent_id - filter to filter by parent
+     * @param bool $use_path_index
      * @return array
      */
-    public function nest(&$items, $parent_id = null)
+    public function nest(&$items, $parent_id = null, $use_path_index=true)
     {
         $nestedRecords = [];
         foreach ($items as $index => $children) {
@@ -67,7 +68,15 @@ trait Nesting
 
                 unset($items[$index]);
                 $children[static::$children_key] = $this->nest($items, $children[static::$item_id_column]);
-                $nestedRecords[] = $children;
+
+                if ($use_path_index && isset($children['path'])) {
+                    $parts = explode('.', $children['path']);
+
+                    $nestedRecords[$parts[count($parts) - 1]] = $children;
+
+                } else {
+                    $nestedRecords[] = $children;
+                }
             }
         }
 
